@@ -106,6 +106,49 @@ const LINES = [
   "For me, horticulture is more than an interest. It's a journey of learning, growing and creating a greener tomorrow.",
 ];
 
+/** Moments from the field, under the About text, each told in my own words. */
+const SNAPSHOTS = [
+  {
+    src: "/mahima/about-7565.jpg",
+    alt: "Mahima checking potted saplings on a nursery bench",
+    ratio: "4 / 3",
+    focus: "50% 40%",
+    label: "In the nursery",
+    caption:
+      "This is me between the nursery benches, checking saplings one by one. I look closely at each leaf for the first signs of pests or disease, because catching them early is the best way to keep a young plant healthy.",
+  },
+  {
+    src: "/mahima/about-8213.jpg",
+    alt: "Mahima tying trellis strings above young tomato plants in a polyhouse",
+    ratio: "4 / 5",
+    focus: "30% 45%",
+    label: "In the polyhouse",
+    caption:
+      "Here I'm tying trellis strings over a bed of young tomato plants. They'll soon climb these lines toward the light, and I love being part of a crop from its very first weeks.",
+  },
+];
+
+function Snapshot({ src, alt, ratio, focus, label, caption }: (typeof SNAPSHOTS)[number]) {
+  return (
+    <motion.figure variants={rise} className="flex flex-col">
+      <div className="relative overflow-hidden rounded-[22px] p-2.5" style={{ background: "var(--m-frame)", boxShadow: "0 30px 60px -28px var(--m-shadow), inset 0 0 0 1px var(--m-line)" }}>
+        <div className="relative overflow-hidden rounded-[15px]" style={{ aspectRatio: ratio }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={asset(src)} alt={alt} loading="lazy" className="h-full w-full object-cover" style={{ objectPosition: focus }} />
+        </div>
+      </div>
+      <figcaption className="mt-5 px-1">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.32em]" style={{ color: "var(--m-accent)", fontFamily: "var(--m-label)" }}>
+          {label}
+        </span>
+        <p className="mt-2 max-w-[52ch] text-[clamp(14px,1.05vw,16px)] leading-[1.7]" style={{ color: "var(--m-muted)" }}>
+          {caption}
+        </p>
+      </figcaption>
+    </motion.figure>
+  );
+}
+
 const rise = {
   hidden: { opacity: 0, y: 26, filter: "blur(8px)" },
   show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1, ease: [0.22, 1, 0.36, 1] as const } },
@@ -178,6 +221,17 @@ export const About = forwardRef<HTMLElement, { theme: Theme; portraitRef: React.
           </div>
         </motion.div>
       </div>
+      <motion.div
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ staggerChildren: 0.18 }}
+        className="mx-auto mt-[14vh] grid max-w-[1240px] items-start gap-12 md:grid-cols-[1.67fr_1fr] md:gap-[4vw]"
+      >
+        {SNAPSHOTS.map((s) => (
+          <Snapshot key={s.src} {...s} />
+        ))}
+      </motion.div>
     </section>
   );
 });
