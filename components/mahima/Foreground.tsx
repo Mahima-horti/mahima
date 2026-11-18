@@ -5,6 +5,7 @@ import { RoundedBox } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { vineWhish } from "./audio";
 import { journal } from "./journalData";
 import { leafGeometry, leafMaterial, type LeafKind } from "./leaves";
 import { easeInOutCubic, garden, seeded, smooth } from "./store";
@@ -168,7 +169,21 @@ function Vines({ theme, lite }: { theme: Theme; lite: boolean }) {
   const root = useRef<THREE.Group>(null);
   useEffect(() => mats.forEach(({ m }) => m.color.set(theme.vine)), [theme, mats]);
   const grow = useMemo(() => (v: number) => smooth(vines[v].start, vines[v].start + 0.5, garden.intro), [vines]);
+  // a faint whish while the vines are moving (growing in or parting), spaced out so it never becomes a hiss
+  const motion = useRef({ intro: garden.intro, part: garden.part, acc: 0, last: 0 });
   useFrame(() => {
+    const m = motion.current;
+    const growing = garden.intro > 0.1 && garden.intro < 0.92 ? Math.abs(garden.intro - m.intro) : 0;
+    const parting = garden.part > 0 && garden.part < 1 ? Math.abs(garden.part - m.part) : 0;
+    m.intro = garden.intro;
+    m.part = garden.part;
+    m.acc = m.acc * 0.97 + growing + parting * 1.5;
+    const now = performance.now();
+    if (m.acc > 0.012 && now - m.last > 550) {
+      vineWhish(m.acc / 0.05);
+      m.last = now;
+      m.acc = 0;
+    }
     const part = easeInOutCubic(garden.part);
     if (root.current) root.current.visible = garden.intro > 0.08 && garden.part < 0.999;
     vines.forEach((v, k) => {

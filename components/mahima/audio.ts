@@ -124,6 +124,30 @@ export function whish() {
   f.frequency.linearRampToValueAtTime(900, t + 0.6);
 }
 
+/**
+ * A faint whish of foliage moving through air, for the vines as they grow in or part: a soft breathy body under an
+ * airy sweep that rises and falls, with a few leaf-brushes. `strength` (0..1) follows how fast they're moving.
+ */
+export function vineWhish(strength = 1) {
+  if (!sound.on || !ctx) return;
+  const t = ctx.currentTime;
+  const s = 0.6 + 0.4 * Math.min(1, Math.max(0, strength));
+  const len = 0.7 + Math.random() * 0.2;
+  const peak = 0.3 + Math.random() * 0.1;
+  const lo = 500 + Math.random() * 200;
+  // the sweep: air rushing past, rising then settling
+  const f = burst(t, len, "bandpass", lo, 0.8, 0.075 * s, len * 0.4);
+  f.frequency.setValueAtTime(lo, t);
+  f.frequency.linearRampToValueAtTime(lo * 3, t + len * peak * 1.6);
+  f.frequency.linearRampToValueAtTime(lo * 1.4, t + len);
+  // a soft low body so it reads as a whoosh, not just hiss
+  burst(t, len * 0.9, "lowpass", 700, 0.5, 0.05 * s, len * 0.35);
+  // a few leaves brushing past at the swell
+  for (let i = 0; i < 4; i++) {
+    burst(t + len * (0.15 + Math.random() * 0.4), 0.05 + Math.random() * 0.05, "bandpass", 1800 + Math.random() * 1800, 1.2, 0.012 * s, 0.012);
+  }
+}
+
 let wind: { stop: () => void } | null = null;
 
 /**
